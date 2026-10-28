@@ -3,14 +3,17 @@ package com.example.material.template;
 import com.example.material.common.ApiException;
 import com.example.material.template.persistence.TemplateMapper;
 import com.example.material.template.persistence.TemplateRow;
-import java.util.List;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.json.JsonMapper;
+
+import java.util.List;
 
 @Service
 public class TemplateService {
@@ -27,12 +30,15 @@ public class TemplateService {
     @Transactional(readOnly = true)
     public TemplateListDto list(String category) {
         String filter = category == null ? null : category.strip();
-        return new TemplateListDto(mapper.selectCategories(), mapper.selectActive(filter).stream()
-                .map(this::toDto).toList());
+        return new TemplateListDto(
+                mapper.selectCategories(),
+                mapper.selectActive(filter).stream().map(this::toDto).toList());
     }
 
     @Transactional(readOnly = true)
-    public TemplateDto get(String id) { return toDto(requireTemplate(id)); }
+    public TemplateDto get(String id) {
+        return toDto(requireTemplate(id));
+    }
 
     @Transactional(readOnly = true)
     public Resource cover(String id) {
@@ -57,8 +63,14 @@ public class TemplateService {
 
     private TemplateDto toDto(TemplateRow row) {
         List<String> types = json.readValue(row.acceptedMimeTypesJson(), new TypeReference<>() {});
-        return new TemplateDto(row.id(), row.title(), row.category(),
-                "/api/templates/" + row.id() + "/cover", row.description(),
-                row.requiredImageCount(), types, row.maxFileSizeBytes());
+        return new TemplateDto(
+                row.id(),
+                row.title(),
+                row.category(),
+                "/api/templates/" + row.id() + "/cover",
+                row.description(),
+                row.requiredImageCount(),
+                types,
+                row.maxFileSizeBytes());
     }
 }

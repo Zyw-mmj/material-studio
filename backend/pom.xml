@@ -9,7 +9,7 @@
   </parent>
   <groupId>com.example</groupId>
   <artifactId>material-studio-api</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <name>Material Studio API</name>
   <description>Independent Java API for the material creation platform</description>
   <properties>

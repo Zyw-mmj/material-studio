@@ -1,0 +1,16 @@
+{
+  "unfinishedTaskId": "374fb83e-df65-4954-9535-45673a45eef5",
+  "afterRestart": "FAILED",
+  "errorCode": "SERVER_RESTARTED",
+  "steps": [
+    "FAILED",
+    "SKIPPED",
+    "SKIPPED"
+  ],
+  "retainedSuccessfulResults": [
+    "28603ed8-6514-4e27-a888-5136ce1ddd10",
+    "dd642565-4845-4457-970a-9e6f847c14fa"
+  ],
+  "retainedAsset": true,
+  "containersRecreated": true
+}

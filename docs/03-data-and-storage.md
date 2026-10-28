@@ -12,7 +12,7 @@ erDiagram
     generation_tasks ||--|{ task_steps : contains
 ```
 
-结构输入：[schema.sql](database/schema.sql)；示例记录：[seed.sql](database/seed.sql)。两份均为设计草案，尚未在 MySQL 实例执行。本项目不使用 H2 的通过结果替代 MySQL JSON、CHECK、外键、排序和事务验证。
+结构输入：[schema.sql](database/schema.sql)；示例记录：[seed.sql](database/seed.sql)。两份是初始设计输入，实际迁移在 backend/src/main/resources/db/；已在真实 MySQL / Testcontainers 中执行并验证约束。本项目不使用 H2 的通过结果替代 MySQL JSON、CHECK、外键、排序和事务验证。
 
 命名：数据库 snake_case、API camelCase。业务对象 UUID 用 `CHAR(36) ascii_bin`，演示用户/模板使用可读字符串 ID；API 中不依赖 ID 连续性。所有 DATETIME(3) 按 UTC 写入，连接时区也设为 UTC；Java 通过统一 Clock 写入与序列化，不依赖操作系统本地时区。
 

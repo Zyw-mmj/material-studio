@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: 素材制作平台模拟生成 API
   version: 1.0.0
-  description: 完整 V1 设计契约。v0.1 初始化已实现 health 与模板四项 GET 操作；身份、上传、制作任务仍待实现。Java 为唯一业务入口。
+  description: 素材制作平台完整 V1 API。Java 提供演示会话、图片上传、三阶段异步模拟制作、个人历史及结果读取。演示身份不用于真实私密数据。所有 POST 需要 CSRF token。
 servers:
 - url: /
   description: 同源入口；本地为 http://localhost:3000
@@ -48,6 +48,7 @@ paths:
           $ref: '#/components/responses/Unavailable'
         default:
           $ref: '#/components/responses/InternalError'
+      x-implementation-status: implemented
   /api/auth/login:
     post:
       operationId: demoLogin
@@ -94,6 +95,7 @@ paths:
           $ref: '#/components/responses/Unavailable'
         default:
           $ref: '#/components/responses/InternalError'
+      x-implementation-status: implemented
   /api/auth/me:
     get:
       operationId: getMe
@@ -123,6 +125,7 @@ paths:
           $ref: '#/components/responses/Unavailable'
         default:
           $ref: '#/components/responses/InternalError'
+      x-implementation-status: implemented
   /api/auth/logout:
     post:
       operationId: logout
@@ -152,6 +155,7 @@ paths:
           $ref: '#/components/responses/Unavailable'
         default:
           $ref: '#/components/responses/InternalError'
+      x-implementation-status: implemented
   /api/templates:
     get:
       operationId: listTemplates
@@ -189,7 +193,7 @@ paths:
           $ref: '#/components/responses/Unavailable'
         default:
           $ref: '#/components/responses/InternalError'
-      x-implementation-status: initialized
+      x-implementation-status: implemented
   /api/templates/{id}:
     parameters:
     - name: id
@@ -228,7 +232,7 @@ paths:
           $ref: '#/components/responses/InternalError'
         '400':
           $ref: '#/components/responses/BadRequest'
-      x-implementation-status: initialized
+      x-implementation-status: implemented
   /api/templates/{id}/cover:
     parameters:
     - name: id
@@ -275,7 +279,7 @@ paths:
           $ref: '#/components/responses/InternalError'
         '400':
           $ref: '#/components/responses/BadRequest'
-      x-implementation-status: initialized
+      x-implementation-status: implemented
   /api/assets:
     post:
       operationId: uploadAsset
@@ -330,6 +334,7 @@ paths:
           $ref: '#/components/responses/Unavailable'
         default:
           $ref: '#/components/responses/InternalError'
+      x-implementation-status: implemented
   /api/assets/{id}/content:
     parameters:
     - name: id
@@ -379,6 +384,7 @@ paths:
           $ref: '#/components/responses/InternalError'
         '400':
           $ref: '#/components/responses/BadRequest'
+      x-implementation-status: implemented
   /api/tasks:
     post:
       operationId: createTask
@@ -432,6 +438,7 @@ paths:
           $ref: '#/components/responses/Unavailable'
         default:
           $ref: '#/components/responses/InternalError'
+      x-implementation-status: implemented
     get:
       operationId: listTasks
       summary: 查询当前用户个人历史/进行中任务
@@ -492,6 +499,7 @@ paths:
           $ref: '#/components/responses/Unavailable'
         default:
           $ref: '#/components/responses/InternalError'
+      x-implementation-status: implemented
   /api/tasks/{id}:
     parameters:
     - name: id
@@ -533,6 +541,7 @@ paths:
           $ref: '#/components/responses/InternalError'
         '400':
           $ref: '#/components/responses/BadRequest'
+      x-implementation-status: implemented
   /api/tasks/{id}/result:
     parameters:
     - name: id
@@ -584,6 +593,7 @@ paths:
           $ref: '#/components/responses/InternalError'
         '400':
           $ref: '#/components/responses/BadRequest'
+      x-implementation-status: implemented
   /api/health:
     get:
       operationId: getHealth
@@ -591,7 +601,7 @@ paths:
       tags:
       - 运行状态
       security: []
-      x-implementation-status: initialized
+      x-implementation-status: implemented
       responses:
         '200':
           description: 仅代表 Java 连通；数据库就绪见内部 Actuator readiness
@@ -1021,6 +1031,7 @@ components:
           - null
         delaysMs:
           $ref: '#/components/schemas/DelaysMs'
+      nullable: true
     CreateTask:
       type: object
       additionalProperties: false

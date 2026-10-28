@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.material.task.TaskMapper">
+  <select id="list" resultType="com.example.material.task.TaskRow">
+    SELECT * FROM generation_tasks WHERE user_id=#{userId}
+    <if test="templateId != null">AND template_id=#{templateId}</if>
+    <choose><when test="status == 'ACTIVE'">AND status IN ('QUEUED','RUNNING')</when><when test="status != 'ALL'">AND status=#{status}</when></choose>
+    <if test="time != null">AND (created_at &lt; #{time} OR (created_at=#{time} AND id &lt; #{cursorId}))</if>
+    ORDER BY created_at DESC,id DESC LIMIT #{limit}
+  </select>
+</mapper>

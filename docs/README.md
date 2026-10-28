@@ -1,6 +1,8 @@
 # 素材制作平台 · 技术文档
 
-设计基线：PRD V1.0 / 2026-10-28。下列八步描述完整 V1 系统设计，**并不表示所有功能已经实现**。当前工程初始化范围、启动方法和验证状态见[项目 README](../README.md)与[工程初始化记录](09-project-initialization.md)。
+设计基线：PRD V1.0 / 2026-10-28；V1.0 业务闭环于 2026-10-29 完成。下列八步保留设计理由，具体源码结构、验证结果与实现取舍以[本轮实现记录](10-full-implementation.md)和[项目 README](../README.md)为准。[v0.1 初始化记录](09-project-initialization.md)是历史快照。
+
+对照用户补充的 9 张原题截图整理的待办、R-01～R-14 当前状态与验收条件见 [TODO](../TODO.md)。
 
 | 步骤 | 文档 | 内容 |
 |---|---|---|
@@ -15,4 +17,4 @@
 
 配套资料：[原始 PRD](source/PRD_v1.0.md)、[OpenAPI](contracts/openapi.yaml)、[Schema](database/schema.sql)、[种子数据](database/seed.sql)、[首轮文档验证记录](verification.md)。
 
-后续开发顺序：会话身份与 CSRF → 素材上传 → 异步任务状态机 → 多任务与历史 → 完整验收。实现变更需同步契约、迁移、测试与运行说明。
+实施记录：[v0.1 初始化](09-project-initialization.md) → [V1.0 完整实现与验收](10-full-implementation.md)。后续变更同步契约、迁移、测试与运行说明。

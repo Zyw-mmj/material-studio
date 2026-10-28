@@ -149,9 +149,9 @@ export function TemplateCatalog() {
           ⌘
         </span>
         <div>
-          <h2>创作的起点，已经就绪。</h2>
+          <h2>创作在后台，灵感不停步。</h2>
           <p>
-            当前开放模板浏览与详情。图片上传、制作任务和个人历史将按技术文档分步实现。
+            选择模板、上传图片，制作会在后台继续。随时返回「我的制作」，查看进度与结果。
           </p>
         </div>
         <span
@@ -159,10 +159,10 @@ export function TemplateCatalog() {
         >
           <span className="status-dot" />
           {health.isLoading
-            ? "正在连接 Java API"
+            ? "正在连接工作室"
             : health.data?.status === "UP"
-              ? "Java API 已连接"
-              : "Java API 未连接"}
+              ? "工作室服务已就绪"
+              : "服务暂不可用"}
         </span>
       </section>
     </div>

@@ -54,3 +54,18 @@ management:
 logging:
   pattern:
     level: '%5p [requestId=%X{requestId:-}]'
+
+app:
+  origin: ${APP_ORIGIN:http://localhost:3001}
+  storage-root: ${STORAGE_ROOT:./.local/material-files}
+sim:
+  validate-delay-ms: ${SIM_VALIDATE_DELAY_MS:1000}
+  generate-delay-ms: ${SIM_GENERATE_DELAY_MS:5000}
+  finalize-delay-ms: ${SIM_FINALIZE_DELAY_MS:1000}
+  fail-at-step: ${SIM_FAIL_AT_STEP:NONE}
+demo:
+  simulation-override-enabled: ${DEMO_SIMULATION_OVERRIDE_ENABLED:false}
+  control-key: ${DEMO_CONTROL_KEY:}
+task:
+  executor-threads: ${TASK_EXECUTOR_THREADS:2}
+  executor-queue-capacity: ${TASK_EXECUTOR_QUEUE_CAPACITY:20}

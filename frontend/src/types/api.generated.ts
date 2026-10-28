@@ -345,7 +345,7 @@ export interface components {
             /** @enum {string|null} */
             failAtStep: "VALIDATE" | "GENERATE" | "FINALIZE" | null;
             delaysMs: components["schemas"]["DelaysMs"];
-        };
+        } | null;
         /** @description simulation 仅在允许开发覆盖且密钥正确时可用；省略使用默认值。 */
         CreateTask: {
             templateId: components["schemas"]["TemplateId"];

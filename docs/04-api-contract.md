@@ -2,11 +2,11 @@
 
 机器可读定义：[OpenAPI 3.0.3](contracts/openapi.yaml)。本章解释行为，OpenAPI 规定字段、必填项、类型、路径和响应；发生不一致必须一起修正后再联调。
 
-工程初始化目前实现 GET `/api/health`、模板列表、详情和封面四个操作。身份、上传、任务相关操作仍是待实现的设计契约；当前清单见[初始化记录](09-project-initialization.md)。健康接口返回 service、status、stage、timestamp，用于前后端连通检查，数据库就绪使用 Actuator readiness。
+OpenAPI 的 14 项操作均已实现，含身份、上传、任务、历史与图片鉴权读取。当前验证见[实施记录](10-full-implementation.md)。健康接口返回 service、status、stage、timestamp，用于前后端连通检查，数据库就绪使用 Actuator readiness。
 
 ## 1. 通用约定
 
-- 浏览器基址 `/api`；本地入口 `http://localhost:3000/api`。不把 `backend:8080` 暴露给浏览器。
+- 浏览器基址 `/api`；本地入口 `http://localhost:3001/api`。不把 `backend:8080` 暴露给浏览器。
 - JSON 使用 UTF-8、camelCase；上传为 multipart，图片读取为二进制。成功直接返回资源对象，列表为 `{items,nextCursor}`，不另包一层 `data`。
 - 时间为 UTC ISO 8601（示例 `2026-10-28T14:00:00.000Z`），ID 不透明，任务/素材/幂等键为 UUID。
 - 会话 Cookie：`MP_SESSION`、HttpOnly、SameSite=Lax、Path=/，HTTPS 配置 Secure，不设置内部服务域名 Domain。
@@ -146,7 +146,7 @@ categories 始终返回全部启用模板的分类，按名称排序；items 按
 }
 ```
 
-simulation 为可选对象；出现时必须含 failAtStep（阶段名或 null）和完整 delaysMs，单值 0～30000 的整数。不出现则使用环境默认值。未开覆盖返回 400 `SIMULATION_DISABLED`，密钥错误/缺失返回 403 `DEMO_CONTROL_FORBIDDEN`；普通浏览器页面不接触密钥。覆盖仅影响本任务，绝不修改其他任务或全局设置。
+simulation 为可选对象，null 与省略均使用默认配置；对象必须含 failAtStep（阶段名或 null）和完整 delaysMs，单值 0～30000 的整数。不出现则使用环境默认值。未开覆盖返回 400 `SIMULATION_DISABLED`，密钥错误/缺失返回 403 `DEMO_CONTROL_FORBIDDEN`；普通浏览器页面不接触密钥。覆盖仅影响本任务，绝不修改其他任务或全局设置。
 
 ## 6. 查询任务与历史
 
@@ -224,4 +224,4 @@ simulation 为可选对象；出现时必须含 failAtStep（阶段名或 null�
 5. 带开发密钥创建第二阶段失败任务，核对 FINALIZE=SKIPPED。
 6. 切换身份与断网，核对查询失败仅改变界面查询状态。
 
-具体可复制的 curl 流程见[部署文档 §4](08-delivery-and-plan.md#4-实现后联调示例)。这些命令须在应用完成后执行，当前文档仓库没有运行中的 API。
+具体可复制的 curl 流程见[部署文档 §4](08-delivery-and-plan.md#4-实现后联调示例)。也可在已启动的本机 Compose 上执行 python3 scripts/smoke.py，验证同源真实业务。

@@ -1,10 +1,12 @@
 "use client";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
+import { useRef } from "react";
+import { IdentityChoices, useAuth } from "./auth-provider";
 export function StudioHeader() {
   const path = usePathname();
+  const auth = useAuth();
+  const menu = useRef<HTMLDetailsElement>(null);
   return (
     <header className="site-header">
       <Link
@@ -39,18 +41,60 @@ export function StudioHeader() {
         >
           模板库
         </Link>
+        <Link
+          className={
+            path.startsWith("/history") ? "nav-link active" : "nav-link"
+          }
+          href="/history"
+        >
+          我的制作
+        </Link>
         <a
-          className="nav-link"
+          className="nav-link docs-nav"
           href="https://github.com/Zyw-mmj/material-studio/tree/main/docs"
           target="_blank"
           rel="noreferrer"
         >
-          技术文档 <span aria-hidden="true">↗</span>
+          技术文档 ↗
         </a>
       </nav>
-      <span className="header-tag">
-        <span className="status-dot" /> SIMULATION STUDIO
-      </span>
+      <details className="identity-menu" ref={menu}>
+        <summary aria-label="选择或切换演示身份">
+          <span className="avatar-badge">
+            {auth.user?.userId === "demo-a"
+              ? "A"
+              : auth.user?.userId === "demo-b"
+                ? "B"
+                : "○"}
+          </span>
+          {auth.busy ? "切换中…" : (auth.user?.displayName ?? "选择身份")}
+          <span aria-hidden="true">⌄</span>
+        </summary>
+        <div className="identity-popover">
+          <span className="eyebrow">DEMO IDENTITY</span>
+          <p>个人素材与制作记录按身份隔离。</p>
+          <IdentityChoices
+            onChoose={() => menu.current?.removeAttribute("open")}
+          />
+          {auth.user && (
+            <button
+              className="logout-button"
+              disabled={auth.busy}
+              onClick={() => {
+                menu.current?.removeAttribute("open");
+                void auth.logout();
+              }}
+            >
+              退出当前身份
+            </button>
+          )}
+          {auth.error && (
+            <p className="form-error" role="alert">
+              {auth.error}
+            </p>
+          )}
+        </div>
+      </details>
     </header>
   );
 }

@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class MaterialStudioApiApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(MaterialStudioApiApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(MaterialStudioApiApplication.class, args);
+    }
 }

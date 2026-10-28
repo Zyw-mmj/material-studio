@@ -36,7 +36,7 @@ Next.js 官方将 rewrites 定义为 URL 代理，可转发到外部地址；本
 
 ## 3. 建议源码结构
 
-下列目录是后续工程目标，目前尚未创建应用代码。
+下列为最初的逻辑分层建议。当前代码已实现：前端组件平铺在 components，调度为 lib/task-tracker.ts；后端 task 下以 TaskCommandService、TaskQueryService、TaskWorker、TaskStateService 等类分工，不再额外嵌套子包。事务显式使用 TransactionTemplate，保证锁定与状态交接的短事务边界。
 
 ```text
 frontend/
