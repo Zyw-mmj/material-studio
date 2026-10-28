@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
+  <rect width="800" height="1000" fill="#eee6d8"/><rect x="25" y="25" width="750" height="950" fill="none" stroke="#b0ac96"/>
+  <text x="61" y="90" font-family="Georgia,serif" font-size="25" fill="#344b48" letter-spacing="5">SOMEWHERE</text><text x="739" y="90" text-anchor="end" font-family="sans-serif" font-size="13" fill="#344b48" letter-spacing="2">NO. 01</text>
+  <path d="M62 664V422a338 338 0 0 1 676 0v242Z" fill="#dba083"/><clipPath id="arch"><path d="M62 664V422a338 338 0 0 1 676 0v242Z"/></clipPath>
+  <g clip-path="url(#arch)"><circle cx="503" cy="343" r="103" fill="#f3dba9"/><path d="M-30 590 228 303 418 513 582 401 847 695H-30Z" fill="#668878"/><path d="m190 345 38-42 60 67-62-23-18 15Z" fill="#e3dfc8"/><path d="M-35 692 196 478 341 615 584 459 850 659v125H-35Z" fill="#315953"/><path d="M-40 671 155 604 299 688 490 580 850 729v100H-40Z" fill="#1f3b3a"/><path d="M457 580C347 632 603 652 461 694s-59 61 29 106H358c-125-72-24-101 78-122s-62-48 21-98" fill="#c4c8a3"/></g>
+  <text x="60" y="770" font-family="Georgia,serif" font-size="74" fill="#254b45">Take the</text><text x="60" y="854" font-family="Georgia,serif" font-size="74" font-style="italic" fill="#254b45">long way.</text><path d="M61 905H739" stroke="#a8ae98"/><text x="61" y="940" font-family="sans-serif" font-size="11" fill="#52675a" letter-spacing="3">A POSTCARD FROM YOUR EVERYDAY ESCAPE</text>
+</svg>

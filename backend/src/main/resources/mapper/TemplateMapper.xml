@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.material.template.persistence.TemplateMapper">
+  <sql id="columns">
+    id, title, category, description, cover_key, required_image_count,
+    CAST(accepted_mime_types AS CHAR) AS accepted_mime_types_json, max_file_size_bytes
+  </sql>
+  <select id="selectCategories" resultType="string">
+    SELECT DISTINCT category FROM templates WHERE active = TRUE ORDER BY category
+  </select>
+  <select id="selectActive" resultType="com.example.material.template.persistence.TemplateRow">
+    SELECT <include refid="columns"/> FROM templates WHERE active = TRUE
+    <if test="category != null and category != ''">AND category = #{category}</if>
+    ORDER BY id
+  </select>
+  <select id="selectActiveById" resultType="com.example.material.template.persistence.TemplateRow">
+    SELECT <include refid="columns"/> FROM templates WHERE active = TRUE AND id = #{id}
+  </select>
+</mapper>

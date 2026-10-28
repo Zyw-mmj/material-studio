@@ -1,0 +1,4 @@
+# Demo users/templates are only seeded with this profile.
+spring:
+  flyway:
+    locations: classpath:db/migration,classpath:db/demo
