@@ -32,6 +32,7 @@ backend/                  Spring Boot、MyBatis、Flyway、JUnit/Testcontainers
   src/main/resources/db/  V1 结构迁移、demo profile V2 种子
 assets/covers/            自制 SVG 封面源文件，PNG 已打包到后端资源
 scripts/smoke.py          同源全栈验证（Python 标准库）
+scripts/up.sh             启动前检查配置、同名副本与真实数据库连接
 compose.yaml              frontend、backend、mysql；数据库与文件卷
 .github/workflows/ci.yml  push / pull_request 检查、测试与构建
 docs/                     分步技术方案、OpenAPI、SQL、实施与验收记录
@@ -39,24 +40,53 @@ docs/                     分步技术方案、OpenAPI、SQL、实施与验收�
 
 ## Compose 启动
 
-需要 Docker Engine/Desktop 与 Compose v2。默认前端 **3001**、MySQL 宿主端口 **13360**；Java 仅暴露在容器网络。
+需要 Docker Engine/Desktop 与 Compose v2。推荐入口使用 Bash（macOS/Linux 自带；Windows 可在 WSL 或 Git Bash 中执行），无需本机 Java、Node.js 或 MySQL。默认前端 **3001**、MySQL 宿主端口 **13360**；Java 仅暴露在容器网络。
+
+首次创建配置；如果已有 `.env`，保留原文件并跳过复制，不要用示例覆盖：
 
 ```bash
 cp .env.example .env
 # 编辑 .env，替换 MYSQL_PASSWORD 与 MYSQL_ROOT_PASSWORD
-docker compose config --quiet
-docker compose up --build -d --wait
-docker compose ps
+bash scripts/up.sh
 ```
 
+脚本先拒绝空/示例密码，检查同名容器是否属于另一目录；再启动 MySQL 并验证应用用户和 root 的实际连接，密码错误会立即给出原因，验证通过才构建并启动前后端。`make up` 使用同一入口。
+
 打开 [http://localhost:3001/templates](http://localhost:3001/templates)。首次启动自动迁移并写入两个演示用户、三个模板，无需手动导入 SQL。浏览器 `/api/**` 经 Next.js 转发到 Java；浏览器不使用容器域名。
+
+已核对配置时也可直接执行标准命令 `docker compose up --build -d --wait`；该入口使用 Compose 原生等待机制。需要提前诊断密码或目录冲突时使用上面的脚本。
 
 ```bash
 docker compose logs -f backend
 docker compose down
 ```
 
-普通停止保留 `mysql_data` 与 `material_files`。更新服务可用 `docker compose up --build -d --wait`，**不要用 `down -v` 更新已有数据**。修改 `JAVA_API_ORIGIN` 后必须重新构建 frontend。
+普通停止保留 `mysql_data` 与 `material_files`。更新代码后再次执行 `bash scripts/up.sh`，**不要用 `down -v` 更新已有数据**。修改 `JAVA_API_ORIGIN` 后必须重新构建 frontend。
+
+## MySQL unhealthy 与同机多个副本
+
+**修改 `.env` 不会修改旧数据卷中的数据库密码。** MySQL 的 MYSQL_USER、MYSQL_PASSWORD、MYSQL_ROOT_PASSWORD、MYSQL_DATABASE 只在空数据目录首次初始化时生效。已有库应继续使用原连接配置；这与 [MySQL 官方镜像说明](https://hub.docker.com/_/mysql)一致。
+
+遇到 `Access denied` / `mysql is unhealthy`：
+
+1. 保留数据卷，恢复初始化该数据库时使用的 `.env`。不知道旧密码时先取回原配置或备份，不用新示例密码覆盖旧库，也不要为消除报错删除卷。
+2. 在原项目目录执行 `bash scripts/up.sh`。脚本会指出 MYSQL_PASSWORD、MYSQL_ROOT_PASSWORD 或库名/用户配置不匹配，不展示密码。
+3. 若需检查原生健康检查的具体错误，可执行以下命令。MySQL 错误已保留在健康日志中，不再只有一个空输出的失败码：
+
+```bash
+docker compose logs --tail=100 mysql
+docker inspect --format '{{json .State.Health}}' "$(docker compose ps -a -q mysql)"
+```
+
+**同一 Docker 中，新克隆/解压到另一目录不代表独立实例。** 默认项目名仍保留为 `material-studio`，避免旧项目升级后丢失原卷的关联。[Compose 按项目名隔离资源](https://docs.docker.com/compose/how-tos/project-name/)，独立副本应在自己的 `.env` 中同时设置：
+
+```dotenv
+COMPOSE_PROJECT_NAME=material-studio-preview
+FRONTEND_PORT=3002
+MYSQL_PORT=13361
+```
+
+再为这个新实例设置自己的两个数据库密码，执行 `bash scripts/up.sh`，打开 `http://localhost:3002`。新项目名使用新的数据库/图片卷，旧数据不会自动迁入。后续启动、停止与更新保持同一项目名；仅修改宿主端口不能隔离数据卷。脚本也支持 `-p <项目名>`、`--env-file <文件>` 等 Compose 全局选项，后续操作要使用同一组选项。
 
 ## 界面演示
 
@@ -75,6 +105,7 @@ docker compose down
 
 | 配置 | 默认/用途 |
 |---|---|
+| COMPOSE_PROJECT_NAME | material-studio；同机独立副本使用不同值，隔离容器、网络和卷 |
 | MYSQL_* / MYSQL_PORT | 数据库用户、密码、库名；宿主端口 13360 |
 | FRONTEND_PORT / APP_ORIGIN | 3001；Origin 默认按该端口生成，使用其他域名时显式设置一致值 |
 | JAVA_API_ORIGIN | 构建时代理目标，Compose 为 http://backend:8080 |
@@ -122,7 +153,7 @@ python3 scripts/smoke.py --include-failure
 先在根目录准备 `.env`，启动 MySQL：
 
 ```bash
-docker compose up -d --wait mysql
+bash scripts/up.sh --mysql-only
 ```
 
 终端一（先停止 Compose 中的 backend/frontend，避免端口和单实例任务竞争）：
@@ -170,6 +201,8 @@ cd backend
 本轮 **前端 18 项、Java 19 项测试通过**。Java 包括 3 单元 + 16 MySQL Testcontainers 集成测试，覆盖阶段顺序/可观察边界/失败中断、会话/上传/所有权、并发幂等、队列拒绝、注销后继续处理和重启收敛；前端覆盖乱序多任务、终态停查、查询异常保留、隐藏/清理/刷新恢复、上传替换、同键确认与身份切换。测试容器为独立 MySQL 和临时目录，不操作开发库；缺 Docker 明确失败。
 
 根目录 `make check` 依次执行前后端检查。GitHub Actions 在 push / pull_request 自动执行 lint、TS、测试与构建，并检查生成 API 类型无漂移。浏览器手工、全栈与重启证据及验收范围见[验证记录](docs/10-full-implementation.md)。
+
+启动回归另运行 `python3 -m unittest discover -s scripts -p 'test_*.py' -v`，覆盖示例密码、旧库密码错误、另一目录的同名项目、首次初始化等待和数据卷保留；已纳入独立 CI 作业。
 
 ## 持久化、部署与边界
 

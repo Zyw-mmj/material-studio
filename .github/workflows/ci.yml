@@ -12,6 +12,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  startup:
+    name: Startup · configuration and data preservation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: bash -n scripts/up.sh
+      - run: python3 -m unittest discover -s scripts -p 'test_*.py' -v
+      - name: Validate Compose example configuration
+        run: docker compose --env-file .env.example config --quiet
+
   frontend:
     name: Frontend · lint, types, tests, build
     runs-on: ubuntu-latest

@@ -1,0 +1,9 @@
+{
+  "project": "material-studio-startup-check-ef4f7de1",
+  "freshStartupSeconds": 29.95,
+  "wrongPasswordSeconds": 0.54,
+  "wrongPasswordRejected": true,
+  "existingDataPreserved": true,
+  "restoredSuccessfully": true,
+  "templateApiPassed": true
+}

@@ -46,13 +46,14 @@ export default {
 ```bash
 cp .env.example .env
 # 编辑本地数据库密码；需要开发覆盖时再填密钥并开启开关
-docker compose config --quiet
-docker compose up --build -d --wait
+bash scripts/up.sh
 docker compose ps
 docker compose logs backend
 ```
 
 源码交付需提供 .gitignore 排除 `.env`、依赖目录、构建缓存、数据库与图片运行数据。MySQL 与 Java 不必对宿主公网映射端口；本机调试若映射，绑定 127.0.0.1。
+
+启动问题修正：示例配置仅用于首次复制，保留已有 .env。启动脚本会拒绝占位密码、阻止另一目录替换同名容器，并在前后端启动前验证现有 MySQL 用户/库名与密码。MySQL 初始化变量不会改写已有卷；独立副本需不同 COMPOSE_PROJECT_NAME 及宿主端口。故障说明和多副本命令以[README](../README.md#mysql-unhealthy-与同机多个副本)为准。
 
 等价本地启动目标：先准备 MySQL 8.4 与数据库用户；Java 设置本机数据库 URL、存储绝对目录、会话与模拟变量，再运行 `./mvnw spring-boot:run`；前端设置 `JAVA_API_ORIGIN=http://127.0.0.1:8080` 后 `npm ci`、`npm run dev`。最终 README 必须给出真实目录、数据库准备命令与完整配置，不能只保留这段概述。
 

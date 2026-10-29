@@ -1,4 +1,6 @@
-name: material-studio
+# Keep the original default so updates retain existing volumes. For another local
+# copy, set a different COMPOSE_PROJECT_NAME and host ports in its private .env.
+name: ${COMPOSE_PROJECT_NAME:-material-studio}
 
 services:
   mysql:
@@ -14,7 +16,8 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_PASSWORD mysql -h 127.0.0.1 -u $$MYSQL_USER -D $$MYSQL_DATABASE -e 'SELECT 1' >/dev/null 2>&1"]
+      # Keep MySQL errors in Docker's health log; never print the password itself.
+      test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_PASSWORD mysql -h 127.0.0.1 -u $$MYSQL_USER -D $$MYSQL_DATABASE -e 'SELECT 1' >/dev/null"]
       interval: 5s
       timeout: 5s
       retries: 30

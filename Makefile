@@ -1,16 +1,16 @@
 .PHONY: help up down db logs check frontend-check backend-check
 help:
-	@echo "up              build and start all services"
+	@echo "up              check configuration/database credentials, build and start services"
 	@echo "db              start MySQL for native development"
 	@echo "check           run frontend checks and Java tests/build (Docker required)"
 	@echo "down            stop services and preserve volumes"
 	@echo "logs            follow service logs"
 up:
-	docker compose up --build -d --wait
+	bash scripts/up.sh
 down:
 	docker compose down
 db:
-	docker compose up -d --wait mysql
+	bash scripts/up.sh --mysql-only
 logs:
 	docker compose logs -f
 frontend-check:
