@@ -20,3 +20,5 @@
 实施记录：[v0.1 初始化](09-project-initialization.md) → [V1.0 完整实现与验收](10-full-implementation.md)。后续变更同步契约、迁移、测试与运行说明。
 
 后续修正：[启动配置、旧卷密码与多副本检查](11-startup-fix.md)。
+
+界面迭代：[布局、账户与个人任务记录管理](12-layout-and-personal-records.md)。

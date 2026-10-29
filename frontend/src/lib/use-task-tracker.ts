@@ -1,14 +1,22 @@
 "use client";
 import { useEffect, useMemo, useSyncExternalStore } from "react";
-import { taskTransport } from "./api";
+import { taskTransport, type TaskFilter } from "./api";
 import { TaskTracker } from "./task-tracker";
 import { useAuth } from "@/components/auth-provider";
-export function useTaskTracker(templateId?: string) {
+export function useTaskTracker(
+  templateId?: string,
+  status: TaskFilter["status"] = "ALL",
+) {
   const { user, epoch, recheck } = useAuth();
   const tracker = useMemo(
     () =>
-      new TaskTracker(taskTransport, templateId, `${user?.userId}:${epoch}`),
-    [templateId, epoch, user?.userId],
+      new TaskTracker(
+        taskTransport,
+        templateId,
+        `${user?.userId}:${epoch}`,
+        status,
+      ),
+    [templateId, status, epoch, user?.userId],
   );
   const snapshot = useSyncExternalStore(
     tracker.subscribe,

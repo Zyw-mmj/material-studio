@@ -58,6 +58,7 @@ export class TaskTracker {
     private transport: TaskTransport,
     private templateId?: string,
     readonly scope = "",
+    private statusFilter: TaskFilter["status"] = "ALL",
   ) {}
   getSnapshot = () => this.snapshot;
   subscribe = (listener: () => void) => {
@@ -147,7 +148,7 @@ export class TaskTracker {
         this.schedule(entry.summary.taskId, 0);
     try {
       const first = await this.transport.list(
-        { status: "ALL", templateId: this.templateId, limit: 20 },
+        { status: this.statusFilter, templateId: this.templateId, limit: 20 },
         controller.signal,
       );
       if (!this.alive(cycle) || controller.signal.aborted) return;
@@ -169,6 +170,7 @@ export class TaskTracker {
         });
         cursor = active.nextCursor ?? undefined;
       } while (cursor);
+      if (this.statusFilter === "ACTIVE") this.emit({ nextCursor: null });
     } catch (error) {
       if (this.alive(cycle) && !controller.signal.aborted)
         this.emit({
@@ -194,7 +196,12 @@ export class TaskTracker {
     this.emit({ loading: true, listError: null });
     try {
       const page = await this.transport.list(
-        { status: "ALL", templateId: this.templateId, limit: 20, cursor },
+        {
+          status: this.statusFilter,
+          templateId: this.templateId,
+          limit: 20,
+          cursor,
+        },
         controller.signal,
       );
       if (!this.alive(cycle) || controller.signal.aborted) return;

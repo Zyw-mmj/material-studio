@@ -26,11 +26,13 @@ function TemplatePreview({ template }: { template: Template }) {
           priority
         />
       </div>
-      <p className="preview-description">{template.description}</p>
-      <div className="template-requirements">
-        <span>{template.requiredImageCount} 张图片</span>
-        <span>JPEG / PNG</span>
-        <span>5 MiB / 张</span>
+      <div className="preview-summary">
+        <p className="preview-description">{template.description}</p>
+        <div className="template-requirements">
+          <span>{template.requiredImageCount} 张图片</span>
+          <span>JPEG / PNG</span>
+          <span>5 MiB / 张</span>
+        </div>
       </div>
     </div>
   );

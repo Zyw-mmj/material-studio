@@ -1,0 +1,46 @@
+{
+  "baseUrl": "http://127.0.0.1:3002",
+  "taskIds": [
+    "890b7d7b-216b-492a-9fbc-b0bc9b4cbe4f",
+    "c75c9710-e29c-4185-839c-856c222fdebb",
+    "36e7a555-b70a-4682-b6f1-4c53ee7effbe"
+  ],
+  "submissionMs": [
+    27.14,
+    17.2,
+    17.06
+  ],
+  "statuses": {
+    "c75c9710-e29c-4185-839c-856c222fdebb": "FAILED",
+    "890b7d7b-216b-492a-9fbc-b0bc9b4cbe4f": "SUCCEEDED",
+    "36e7a555-b70a-4682-b6f1-4c53ee7effbe": "SUCCEEDED"
+  },
+  "observedStages": {
+    "890b7d7b-216b-492a-9fbc-b0bc9b4cbe4f": [
+      "FINALIZE",
+      "GENERATE",
+      "VALIDATE"
+    ],
+    "c75c9710-e29c-4185-839c-856c222fdebb": [
+      "GENERATE",
+      "VALIDATE"
+    ],
+    "36e7a555-b70a-4682-b6f1-4c53ee7effbe": [
+      "FINALIZE",
+      "GENERATE",
+      "VALIDATE"
+    ]
+  },
+  "checks": [
+    "Java template API",
+    "upload validation and persistence",
+    "async acceptance",
+    "idempotent retry",
+    "multiple tasks",
+    "read-only query",
+    "user isolation",
+    "fresh-session history",
+    "readable simulated results"
+  ],
+  "specifiedFailure": "passed"
+}

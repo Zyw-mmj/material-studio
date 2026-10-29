@@ -83,6 +83,60 @@ afterEach(() => {
   vi.useRealTimers();
 });
 describe("page-scoped task queries", () => {
+  it("keeps server status/template filters on every history page while tracking active tasks", async () => {
+    const api = transport([]);
+    api.list = vi.fn(async (filter) =>
+      filter.status === "ACTIVE"
+        ? { items: [summary("active")], nextCursor: null }
+        : {
+            items: [
+              summary(
+                filter.cursor ? "older-success" : "success",
+                "SUCCEEDED",
+                4,
+              ),
+            ],
+            nextCursor: filter.cursor ? null : "success-next",
+          },
+    );
+    const tracker = new TaskTracker(api, "demo-avatar", "user-a", "SUCCEEDED");
+    stores.push(tracker);
+    tracker.start();
+    await flush();
+    expect(api.list).toHaveBeenCalledWith(
+      { status: "SUCCEEDED", templateId: "demo-avatar", limit: 20 },
+      expect.any(AbortSignal),
+    );
+    expect(
+      tracker.getSnapshot().entries.map((e) => e.summary.taskId),
+    ).toContain("active");
+    await tracker.loadMore();
+    expect(api.list).toHaveBeenCalledWith(
+      {
+        status: "SUCCEEDED",
+        templateId: "demo-avatar",
+        limit: 20,
+        cursor: "success-next",
+      },
+      expect.any(AbortSignal),
+    );
+    expect(
+      tracker.getSnapshot().entries.map((e) => e.summary.taskId),
+    ).toContain("older-success");
+  });
+  it("does not offer redundant pagination after discovering all active pages", async () => {
+    const api = transport([]);
+    api.list = vi.fn(async (filter) => ({
+      items: [summary(filter.cursor ? "older" : "active")],
+      nextCursor: filter.limit === 20 || !filter.cursor ? "active-next" : null,
+    }));
+    const tracker = new TaskTracker(api, undefined, "user-a", "ACTIVE");
+    stores.push(tracker);
+    tracker.start();
+    await flush();
+    expect(tracker.getSnapshot().entries).toHaveLength(2);
+    expect(tracker.getSnapshot().nextCursor).toBeNull();
+  });
   it("keeps multiple tasks independent when replies arrive out of order", async () => {
     const a = deferred<TaskDetail>(),
       b = deferred<TaskDetail>();

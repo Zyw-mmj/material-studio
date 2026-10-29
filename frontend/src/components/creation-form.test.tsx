@@ -80,6 +80,7 @@ it("preserves the exact idempotency key and payload after an uncertain submissio
   expect(posts[0][1]).toEqual(posts[1][1]);
   expect(posts[0][3]).toEqual(posts[1][3]);
   expect(screen.getByRole("button", { name: /开始制作/ })).toBeDisabled();
+  expect(screen.getByRole("status")).toHaveFocus();
 });
 it("ignores an old upload response after replacing the selected image", async () => {
   let finish!: (value: unknown) => void;
@@ -106,4 +107,16 @@ it("ignores an old upload response after replacing the selected image", async ()
     templateId: "demo-avatar",
     assetIds: ["new-asset"],
   });
+});
+
+it("returns keyboard focus to the upload input after removing a ready image", async () => {
+  mutate.mockResolvedValue(asset("ready") as never);
+  const { input } = mount();
+  choose(input);
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: /开始制作/ })).toBeEnabled(),
+  );
+  fireEvent.click(screen.getByRole("button", { name: "移除素材 1" }));
+  expect(input).toHaveFocus();
+  expect(screen.getByRole("button", { name: /开始制作/ })).toBeDisabled();
 });

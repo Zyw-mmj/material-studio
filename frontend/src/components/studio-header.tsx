@@ -1,12 +1,14 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useRef } from "react";
-import { IdentityChoices, useAuth } from "./auth-provider";
+import { useState } from "react";
+import { useAuth } from "./auth-provider";
+import { AccountDialog } from "./account-dialog";
+import { StudioIcon } from "./studio-icon";
 export function StudioHeader() {
   const path = usePathname();
   const auth = useAuth();
-  const menu = useRef<HTMLDetailsElement>(null);
+  const [accountOpen, setAccountOpen] = useState(false);
   return (
     <header className="site-header">
       <Link
@@ -38,7 +40,9 @@ export function StudioHeader() {
             path.startsWith("/templates") ? "nav-link active" : "nav-link"
           }
           href="/templates"
+          aria-current={path.startsWith("/templates") ? "page" : undefined}
         >
+          <StudioIcon name="grid" />
           模板库
         </Link>
         <Link
@@ -46,7 +50,9 @@ export function StudioHeader() {
             path.startsWith("/history") ? "nav-link active" : "nav-link"
           }
           href="/history"
+          aria-current={path.startsWith("/history") ? "page" : undefined}
         >
+          <StudioIcon name="history" />
           我的制作
         </Link>
         <a
@@ -55,46 +61,32 @@ export function StudioHeader() {
           target="_blank"
           rel="noreferrer"
         >
-          技术文档 ↗
+          使用与技术文档 ↗
         </a>
       </nav>
-      <details className="identity-menu" ref={menu}>
-        <summary aria-label="选择或切换演示身份">
-          <span className="avatar-badge">
-            {auth.user?.userId === "demo-a"
-              ? "A"
-              : auth.user?.userId === "demo-b"
-                ? "B"
-                : "○"}
-          </span>
+      <button
+        type="button"
+        className="account-trigger"
+        aria-label="打开账户与个人记录"
+        aria-haspopup="dialog"
+        aria-expanded={accountOpen}
+        onClick={() => setAccountOpen(true)}
+      >
+        <span className="avatar-badge">
+          {auth.user?.userId === "demo-a" ? (
+            "A"
+          ) : auth.user?.userId === "demo-b" ? (
+            "B"
+          ) : (
+            <StudioIcon name="user" size={16} />
+          )}
+        </span>
+        <span>
           {auth.busy ? "切换中…" : (auth.user?.displayName ?? "选择身份")}
-          <span aria-hidden="true">⌄</span>
-        </summary>
-        <div className="identity-popover">
-          <span className="eyebrow">DEMO IDENTITY</span>
-          <p>个人素材与制作记录按身份隔离。</p>
-          <IdentityChoices
-            onChoose={() => menu.current?.removeAttribute("open")}
-          />
-          {auth.user && (
-            <button
-              className="logout-button"
-              disabled={auth.busy}
-              onClick={() => {
-                menu.current?.removeAttribute("open");
-                void auth.logout();
-              }}
-            >
-              退出当前身份
-            </button>
-          )}
-          {auth.error && (
-            <p className="form-error" role="alert">
-              {auth.error}
-            </p>
-          )}
-        </div>
-      </details>
+        </span>
+        <span aria-hidden="true">⌄</span>
+      </button>
+      <AccountDialog open={accountOpen} onClose={() => setAccountOpen(false)} />
     </header>
   );
 }

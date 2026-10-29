@@ -7,7 +7,7 @@ export default async function TemplatePage({
 }) {
   const { id } = await params;
   return (
-    <main id="main-content">
+    <main id="main-content" tabIndex={-1}>
       <TemplateDetail id={id} />
     </main>
   );

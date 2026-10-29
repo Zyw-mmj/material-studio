@@ -37,6 +37,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const busy = useRef(false);
   const lastKnown = useRef<User | null>(null);
   const channel = useRef<BroadcastChannel | null>(null);
+  const pendingRecheck = useRef<{
+    sequence: number;
+    result: Promise<User | null>;
+  } | null>(null);
   const invalidateSequence = useCallback(() => {
     ++sequence.current;
   }, []);
@@ -48,47 +52,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       /* storage can be unavailable */
     }
   }, []);
-  const recheck = useCallback(async () => {
-    if (busy.current) return null;
+  const recheck = useCallback((): Promise<User | null> => {
+    if (busy.current) return Promise.resolve(null);
+    // Provider and page visibility handlers share one identity check, so neither
+    // invalidates the other's result before the task tracker can resume.
+    if (pendingRecheck.current?.sequence === sequence.current)
+      return pendingRecheck.current.result;
     const current = ++sequence.current;
-    try {
-      const user = await requestApi<User>("/auth/me");
-      if (current !== sequence.current) return null;
-      lastKnown.current = user;
-      setState((previous) => ({
-        ...previous,
-        user,
-        ready: true,
-        busy: false,
-        error: null,
-        epoch:
-          previous.user?.userId === user.userId
-            ? previous.epoch
-            : previous.epoch + 1,
-      }));
-      return user;
-    } catch (error) {
-      if (current !== sequence.current) return null;
-      if (error instanceof ApiRequestError && error.status === 401) {
-        lastKnown.current = null;
+    const result = (async () => {
+      try {
+        const user = await requestApi<User>("/auth/me");
+        if (current !== sequence.current) return null;
+        lastKnown.current = user;
         setState((previous) => ({
           ...previous,
-          user: null,
+          user,
           ready: true,
           busy: false,
-          epoch: previous.epoch + 1,
           error: null,
+          epoch:
+            previous.user?.userId === user.userId
+              ? previous.epoch
+              : previous.epoch + 1,
         }));
-        return null;
+        return user;
+      } catch (error) {
+        if (current !== sequence.current) return null;
+        if (error instanceof ApiRequestError && error.status === 401) {
+          lastKnown.current = null;
+          setState((previous) => ({
+            ...previous,
+            user: null,
+            ready: true,
+            busy: false,
+            epoch: previous.epoch + 1,
+            error: null,
+          }));
+          return null;
+        }
+        setState((previous) => ({
+          ...previous,
+          ready: true,
+          busy: false,
+          error: "身份暂时无法更新，将保留最近一次确认的信息",
+        }));
+        return lastKnown.current;
       }
-      setState((previous) => ({
-        ...previous,
-        ready: true,
-        busy: false,
-        error: "身份暂时无法更新，将保留最近一次确认的信息",
-      }));
-      return lastKnown.current;
-    }
+    })();
+    pendingRecheck.current = { sequence: current, result };
+    const clear = () => {
+      if (pendingRecheck.current?.sequence === current)
+        pendingRecheck.current = null;
+    };
+    void result.then(clear, clear);
+    return result;
   }, []);
   useEffect(() => {
     void recheck();
@@ -231,9 +248,12 @@ export function IdentityChoices({ onChoose }: { onChoose?: () => void } = {}) {
       {(["demo-a", "demo-b"] as const).map((id, index) => (
         <button
           key={id}
+          type="button"
           aria-label={`选择演示用户 ${index === 0 ? "A" : "B"}`}
-          disabled={auth.busy}
+          aria-pressed={auth.user?.userId === id}
+          aria-disabled={auth.busy}
           onClick={() => {
+            if (auth.busy || auth.user?.userId === id) return;
             onChoose?.();
             void auth.login(id);
           }}

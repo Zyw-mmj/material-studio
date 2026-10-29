@@ -94,7 +94,7 @@ export async function mutateApi<T>(
   });
 }
 export type TaskFilter = {
-  status: "ALL" | "ACTIVE";
+  status: "ALL" | "ACTIVE" | "SUCCEEDED" | "FAILED";
   templateId?: string;
   cursor?: string;
   limit?: number;

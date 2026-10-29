@@ -3,7 +3,7 @@ import { TemplateCatalog } from "@/components/template-catalog";
 
 export default function TemplatesPage() {
   return (
-    <main id="main-content">
+    <main id="main-content" tabIndex={-1}>
       <Suspense
         fallback={
           <div className="page-shell loading-copy">正在打开工作室…</div>

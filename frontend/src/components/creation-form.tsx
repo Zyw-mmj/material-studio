@@ -36,6 +36,10 @@ export function CreationForm({
   >("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const feedback = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (message || error) feedback.current?.focus();
+  }, [message, error]);
   const versions = useRef(new Map<number, number>());
   const controllers = useRef(new Map<number, AbortController>());
   const previews = useRef(new Map<number, string>());
@@ -200,6 +204,7 @@ export function CreationForm({
               className="visually-hidden"
               id={`${base}-${index}`}
               type="file"
+              aria-label={`选择图片 ${index + 1}`}
               accept={template.acceptedMimeTypes.join(",")}
               disabled={frozenInputs}
               onChange={(event) => {
@@ -239,7 +244,10 @@ export function CreationForm({
                 <button
                   className="text-button"
                   disabled={frozenInputs}
-                  onClick={() => reset(index)}
+                  onClick={() => {
+                    reset(index);
+                    document.getElementById(`${base}-${index}`)?.focus();
+                  }}
                   aria-label={`移除素材 ${index + 1}`}
                 >
                   移除
@@ -277,17 +285,17 @@ export function CreationForm({
         <span aria-hidden="true">↗</span>
       </button>
       {error && (
-        <p className="form-error" role="alert">
+        <p className="form-error" role="alert" ref={feedback} tabIndex={-1}>
           {error}
         </p>
       )}
       {message && (
-        <p className="form-success" role="status">
+        <p className="form-success" role="status" ref={feedback} tabIndex={-1}>
           {message}
         </p>
       )}
       <p className="small-muted creation-note">
-        模拟制作将复制第一张图片作为结果。后台执行时，可以继续浏览或关闭页面。
+        提交后可离开页面，稍后在记录中查看结果。
       </p>
     </section>
   );

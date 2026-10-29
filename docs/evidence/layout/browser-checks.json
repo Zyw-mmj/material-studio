@@ -1,0 +1,50 @@
+{
+  "focusTrap": [
+    {
+      "inDialog": true,
+      "name": "选择演示用户 A"
+    },
+    {
+      "inDialog": true,
+      "name": "选择演示用户 B"
+    },
+    {
+      "inDialog": true,
+      "name": "关闭账户与个人记录"
+    },
+    {
+      "inDialog": true,
+      "name": "选择演示用户 A"
+    },
+    {
+      "inDialog": true,
+      "name": "选择演示用户 B"
+    },
+    {
+      "inDialog": true,
+      "name": "关闭账户与个人记录"
+    },
+    {
+      "inDialog": true,
+      "name": "选择演示用户 A"
+    }
+  ],
+  "escapeRestoresTrigger": true,
+  "removeRestoresUploadFocus": true,
+  "submissionFeedbackFocus": "status",
+  "smallScreen": {
+    "viewport": 320,
+    "pageWidth": 305,
+    "pageScrollWidth": 305,
+    "dialogWidth": 294,
+    "dialogScrollWidth": 294,
+    "closeButtonTopAfterScroll": 33
+  },
+  "identityRecords": {
+    "A": 4,
+    "B": 0,
+    "restoredA": 4
+  },
+  "statusTemplateFiltering": true,
+  "refreshRestoredTask": "46a3e55e-23b9-4f6d-ac99-d6e17b3c5e24"
+}
