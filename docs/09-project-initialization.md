@@ -6,7 +6,7 @@
 
 ## 1. 仓库与结构
 
-[Zyw-mmj/material-studio](https://github.com/Zyw-mmj/material-studio)，私有仓库，默认分支 main。保留原始 PRD 与八步技术文档，新增 frontend / backend 独立工程，不使用 Next.js 代替 Java 业务层。
+[Zyw-mmj/material-studio](https://github.com/Zyw-mmj/material-studio)，默认分支 main。初始化时为私有仓库，当前已公开，可通过 HTTPS 匿名读取和克隆。保留原始 PRD 与八步技术文档，新增 frontend / backend 独立工程，不使用 Next.js 代替 Java 业务层。
 
 Git 读取使用 HTTPS；推送使用本机已配置并验证的同一 GitHub 账号 SSH 身份。真实 .env 仅留本机，依赖目录、日志、数据卷和构建产物不进入提交。
 

@@ -2,7 +2,7 @@
 
 可独立运行的前后端分离素材制作网站。浏览模板、选择演示身份、上传图片、提交制作任务，再查看后台阶段和个人历史。**制作使用可控模拟器，成功结果为第一张输入图的副本。**
 
-[GitHub 私有仓库](https://github.com/Zyw-mmj/material-studio) · [GitHub Actions](https://github.com/Zyw-mmj/material-studio/actions) · [技术文档](docs/README.md) · [完成清单](TODO.md) · [业务验证](docs/10-full-implementation.md) · [布局与个人记录迭代](docs/12-layout-and-personal-records.md)
+[GitHub 公开仓库](https://github.com/Zyw-mmj/material-studio) · [GitHub Actions](https://github.com/Zyw-mmj/material-studio/actions) · [技术文档](docs/README.md) · [完成清单](TODO.md) · [业务验证](docs/10-full-implementation.md) · [布局与个人记录迭代](docs/12-layout-and-personal-records.md)
 
 ## 已完成的业务
 
@@ -42,7 +42,7 @@ docs/                     分步技术方案、OpenAPI、SQL、实施与验收�
 
 下面是从 GitHub 下载后首次运行的完整流程。已有项目更新请直接看本节末尾的「已有项目更新」，保留原 `.env`。
 
-### 1. 准备环境与仓库权限
+### 1. 准备运行环境
 
 安装 Git、Docker Desktop（Linux 也可使用 Docker Engine + Compose v2），并启动 Docker。macOS/Linux 使用终端，Windows 在 WSL 或 Git Bash 中执行本节命令。无需本机 Java、Node.js、Maven 或 MySQL。
 
@@ -56,7 +56,7 @@ docker info
 
 三条命令都应成功；`docker info` 若提示无法连接 daemon，请先启动 Docker Desktop/Engine 再继续。首次构建需要联网下载容器镜像及 npm/Maven 依赖，耗时取决于网络和机器性能；后续构建会复用缓存。
 
-本项目是 **GitHub 私有仓库**。下载者需要先获得仓库访问权限，并配置 GitHub 的 Git 身份验证（HTTPS 凭据管理器 / Personal Access Token，或 SSH 密钥）；GitHub 网页登录本身不代表终端已经登录。出现 `Repository not found` 或认证失败时，先检查账号与权限。
+本项目是 **GitHub 公开仓库**，可直接通过下方 HTTPS 地址浏览和克隆，无需登录 GitHub 或申请读取权限。若选择 SSH 地址克隆，仍需先配置 GitHub SSH 密钥。
 
 ### 2. 下载 main 分支最新代码
 
