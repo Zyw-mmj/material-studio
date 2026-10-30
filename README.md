@@ -16,13 +16,13 @@
 
 ## 技术版本与目录
 
-| 层次 | 版本 |
-|---|---|
-| Node.js | 24.22.1（.nvmrc / .node-version） |
-| Next.js / React / TypeScript | 16.4.3 / 19.3.1 / 5.9.3 |
-| Java / Spring Boot / MyBatis Starter | JDK 21 / 4.0.9 / 4.0.0 |
-| Maven Wrapper | 3.9.11 |
-| MySQL | 8.4，Compose 与 Testcontainers 使用同一固定镜像摘要 |
+| 层次                                 | 版本                                                |
+| ------------------------------------ | --------------------------------------------------- |
+| Node.js                              | 24.22.1（.nvmrc / .node-version）                   |
+| Next.js / React / TypeScript         | 16.4.3 / 19.3.1 / 5.9.3                             |
+| Java / Spring Boot / MyBatis Starter | JDK 21 / 4.0.9 / 4.0.0                              |
+| Maven Wrapper                        | 3.9.11                                              |
+| MySQL                                | 8.4，Compose 与 Testcontainers 使用同一固定镜像摘要 |
 
 应用版本 1.0.0。前端 package-lock、后端 POM/BOM/Wrapper、容器镜像摘要和 Actions commit SHA 均已提交。
 
@@ -40,28 +40,114 @@ docs/                     分步技术方案、OpenAPI、SQL、实施与验收�
 
 ## Compose 启动
 
-需要 Docker Engine/Desktop 与 Compose v2。推荐入口使用 Bash（macOS/Linux 自带；Windows 可在 WSL 或 Git Bash 中执行），无需本机 Java、Node.js 或 MySQL。默认前端 **3001**、MySQL 宿主端口 **13360**；Java 仅暴露在容器网络。
+下面是从 GitHub 下载后首次运行的完整流程。已有项目更新请直接看本节末尾的「已有项目更新」，保留原 `.env`。
 
-首次创建配置；如果已有 `.env`，保留原文件并跳过复制，不要用示例覆盖：
+### 1. 准备环境与仓库权限
+
+安装 Git、Docker Desktop（Linux 也可使用 Docker Engine + Compose v2），并启动 Docker。macOS/Linux 使用终端，Windows 在 WSL 或 Git Bash 中执行本节命令。无需本机 Java、Node.js、Maven 或 MySQL。
+
+在终端检查：
 
 ```bash
-cp .env.example .env
-# 编辑 .env，替换 MYSQL_PASSWORD 与 MYSQL_ROOT_PASSWORD
+git --version
+docker compose version
+docker info
+```
+
+三条命令都应成功；`docker info` 若提示无法连接 daemon，请先启动 Docker Desktop/Engine 再继续。首次构建需要联网下载容器镜像及 npm/Maven 依赖，耗时取决于网络和机器性能；后续构建会复用缓存。
+
+本项目是 **GitHub 私有仓库**。下载者需要先获得仓库访问权限，并配置 GitHub 的 Git 身份验证（HTTPS 凭据管理器 / Personal Access Token，或 SSH 密钥）；GitHub 网页登录本身不代表终端已经登录。出现 `Repository not found` 或认证失败时，先检查账号与权限。
+
+### 2. 下载 main 分支最新代码
+
+在准备存放项目的目录执行：
+
+```bash
+git clone --config core.autocrlf=false --branch main https://github.com/Zyw-mmj/material-studio.git
+cd material-studio
+git log -1 --oneline
+```
+
+`core.autocrlf=false` 让此仓库保留脚本的 LF 换行，避免 Windows 自动转换换行后 Bash/Maven 脚本无法执行。如果已配置 SSH，可将 clone 地址替换为 `git@github.com:Zyw-mmj/material-studio.git`。后续所有启动、查看日志和停止命令都在项目根目录执行，即包含 `compose.yaml` 和 `scripts/` 的目录。
+
+### 3. 首次创建本机配置
+
+仅在没有 `.env` 时复制，避免覆盖已有密码：
+
+```bash
+test -f .env || cp .env.example .env
+```
+
+用文本编辑器打开根目录 `.env`（macOS/Linux 可执行 `nano .env`）：
+
+- 将 `MYSQL_PASSWORD=CHANGE_ME_LOCAL_DB` 中的示例值换成自己生成的随机密码。
+- 将 `MYSQL_ROOT_PASSWORD=CHANGE_ME_LOCAL_ROOT` 换成另一个随机密码。建议使用较长的英文字母、数字组合，避免空格和 `$` 的配置转义问题；不要保留 `CHANGE_ME` 示例值。
+- 其余配置首次可保持默认。前端使用 **3001**，MySQL 宿主端口使用 **13360**；Java 仅暴露在容器网络。
+
+在 nano 中按 `Control + O`、回车保存，再按 `Control + X` 退出。`.env` 仅保存在本机，不提交 Git。
+
+如果本机已运行另一份本项目，先按下一节「同机多个副本」修改新副本的项目名和端口，再启动；重新下载到新目录不会自动隔离现有数据库。
+
+### 4. 一条命令启动完整项目
+
+```bash
 bash scripts/up.sh
 ```
 
 脚本先拒绝空/示例密码，检查同名容器是否属于另一目录；再启动 MySQL 并验证应用用户和 root 的实际连接，密码错误会立即给出原因，验证通过才构建并启动前后端。`make up` 使用同一入口。
 
-打开 [http://localhost:3001/templates](http://localhost:3001/templates)。首次启动自动迁移并写入两个演示用户、三个模板，无需手动导入 SQL。浏览器 `/api/**` 经 Next.js 转发到 Java；浏览器不使用容器域名。
+首次启动自动执行数据库迁移，写入两个演示用户、三个模板，并准备示例封面，**无需手动导入 SQL 或另外启动后端**。上传图片及制作结果由容器数据卷保存。
 
-已核对配置时也可直接执行标准命令 `docker compose up --build -d --wait`；该入口使用 Compose 原生等待机制。需要提前诊断密码或目录冲突时使用上面的脚本。
+### 5. 确认启动成功并体验
 
 ```bash
-docker compose logs -f backend
-docker compose down
+docker compose ps
 ```
 
-普通停止保留 `mysql_data` 与 `material_files`。更新代码后再次执行 `bash scripts/up.sh`，**不要用 `down -v` 更新已有数据**。修改 `JAVA_API_ORIGIN` 后必须重新构建 frontend。
+应看到 `mysql`、`backend`、`frontend` 三个服务均为 `Up`，健康状态为 `healthy`。如果尚在 `starting`，稍后再查看；如果脚本报错或容器 `unhealthy`，先查看本节末尾的日志命令，不要直接删除数据卷。
+
+打开 [http://localhost:3001/templates](http://localhost:3001/templates)。应能看到三个模板，并可切换分类。浏览器 `/api/**` 经 Next.js 转发到 Java；浏览器不使用容器域名。可选的连通性检查：
+
+```bash
+curl --fail http://localhost:3001/api/health
+```
+
+然后按以下最小流程验证业务：
+
+1. 点击右上角账户按钮，选择「演示用户 A」，无需注册或输入密码。
+2. 打开「旅行明信片」，上传两张 JPEG/PNG，每张不超过 5 MiB。仓库自带的 `backend/src/main/resources/demo-covers/avatar.png` 和 `life.png` 可直接作为本地演示素材。
+3. 点击「开始制作」，观察「素材检查 → 模拟生成 → 结果整理」，完成后打开结果。模拟成功结果是第一张输入图的副本。
+4. 进入「我的制作」查看记录，刷新页面后记录仍在。切换为 B 时应只显示 B 自己的记录；再切回 A 可读回 A 的记录。
+
+### 已有项目更新
+
+回到原来运行项目的目录，确认自己的代码改动已妥善保存后执行：
+
+```bash
+git switch main
+git pull --ff-only origin main
+bash scripts/up.sh
+```
+
+保留原 `.env`、Compose 项目名和数据卷，**不要重新用示例配置覆盖密码，也不要用 `docker compose down -v` 更新**。更新后打开相同地址，必要时强制刷新浏览器。修改 `JAVA_API_ORIGIN` 后必须重新构建 frontend；上面的启动脚本会执行构建。
+
+### 查看日志与停止
+
+```bash
+# 查看三个服务的最近日志
+docker compose logs --tail=100 mysql backend frontend
+
+# 持续查看后端日志，Control + C 退出日志查看
+docker compose logs -f backend
+
+# 停止并移除容器，保留数据库和图片数据卷
+docker compose down
+
+# 下次继续运行（先确认 Docker 已启动）
+bash scripts/up.sh
+```
+
+已核对配置时也可直接执行标准命令 `docker compose up --build -d --wait`；该入口使用 Compose 原生等待机制。需要提前诊断密码或目录冲突时使用上面的脚本。
 
 ## MySQL unhealthy 与同机多个副本
 
@@ -117,20 +203,20 @@ MYSQL_PORT=13361
 
 配置以根 `.env.example`、`compose.yaml` 和后端 `application.yml` 为准。根 `.env` 只在本机保存，不提交。
 
-| 配置 | 默认/用途 |
-|---|---|
-| COMPOSE_PROJECT_NAME | material-studio；同机独立副本使用不同值，隔离容器、网络和卷 |
-| MYSQL_* / MYSQL_PORT | 数据库用户、密码、库名；宿主端口 13360 |
-| FRONTEND_PORT / APP_ORIGIN | 3001；Origin 默认按该端口生成，使用其他域名时显式设置一致值 |
-| JAVA_API_ORIGIN | 构建时代理目标，Compose 为 http://backend:8080 |
-| STORAGE_ROOT | Compose 固定 /data/material；本机 Java 默认 ./.local/material-files |
-| SIM_VALIDATE_DELAY_MS | 1000 |
-| SIM_GENERATE_DELAY_MS | 5000 |
-| SIM_FINALIZE_DELAY_MS | 1000；以上每项 0～30000 毫秒 |
-| SIM_FAIL_AT_STEP | NONE；可选 VALIDATE、GENERATE、FINALIZE，影响之后新建任务 |
-| TASK_EXECUTOR_THREADS / TASK_EXECUTOR_QUEUE_CAPACITY | 2 / 20；拒绝时记录 EXECUTOR_REJECTED 失败 |
-| DEMO_SIMULATION_OVERRIDE_ENABLED / DEMO_CONTROL_KEY | false / 空；仅开发 API 使用，普通前端不接触密钥 |
-| SESSION_COOKIE_SECURE | 本机 HTTP 默认 false；HTTPS 部署须设置 true |
+| 配置                                                 | 默认/用途                                                           |
+| ---------------------------------------------------- | ------------------------------------------------------------------- |
+| COMPOSE_PROJECT_NAME                                 | material-studio；同机独立副本使用不同值，隔离容器、网络和卷         |
+| MYSQL_* / MYSQL_PORT                                 | 数据库用户、密码、库名；宿主端口 13360                              |
+| FRONTEND_PORT / APP_ORIGIN                           | 3001；Origin 默认按该端口生成，使用其他域名时显式设置一致值         |
+| JAVA_API_ORIGIN                                      | 构建时代理目标，Compose 为 http://backend:8080                      |
+| STORAGE_ROOT                                         | Compose 固定 /data/material；本机 Java 默认 ./.local/material-files |
+| SIM_VALIDATE_DELAY_MS                                | 1000                                                                |
+| SIM_GENERATE_DELAY_MS                                | 5000                                                                |
+| SIM_FINALIZE_DELAY_MS                                | 1000；以上每项 0～30000 毫秒                                        |
+| SIM_FAIL_AT_STEP                                     | NONE；可选 VALIDATE、GENERATE、FINALIZE，影响之后新建任务           |
+| TASK_EXECUTOR_THREADS / TASK_EXECUTOR_QUEUE_CAPACITY | 2 / 20；拒绝时记录 EXECUTOR_REJECTED 失败                           |
+| DEMO_SIMULATION_OVERRIDE_ENABLED / DEMO_CONTROL_KEY  | false / 空；仅开发 API 使用，普通前端不接触密钥                     |
+| SESSION_COOKIE_SECURE                                | 本机 HTTP 默认 false；HTTPS 部署须设置 true                         |
 
 最简单的失败演示：在 `.env` 设置 `SIM_FAIL_AT_STEP=GENERATE`，执行 `docker compose up -d --wait backend`，在页面创建新任务。预期第一阶段成功、第二阶段失败、第三阶段 SKIPPED。改回 NONE 并更新 backend 后，新任务恢复正常。调整三个 SIM 延迟可观察排队/处理中；配置会在建任务时快照，不改变已存在任务。
 
@@ -146,13 +232,13 @@ python3 scripts/smoke.py --include-failure
 
 [OpenAPI](docs/contracts/openapi.yaml) 的 14 项操作均已实现，TS 类型从契约生成。
 
-| 业务 | 接口 |
-|---|---|
+| 业务 | 接口                                                                              |
+| ---- | --------------------------------------------------------------------------------- |
 | 身份 | GET /api/auth/csrf、POST /api/auth/login、GET /api/auth/me、POST /api/auth/logout |
-| 模板 | GET /api/templates、GET /api/templates/{id}、GET /api/templates/{id}/cover |
-| 素材 | POST /api/assets、GET /api/assets/{id}/content |
-| 制作 | POST /api/tasks、GET /api/tasks、GET /api/tasks/{id}、GET /api/tasks/{id}/result |
-| 连通 | GET /api/health |
+| 模板 | GET /api/templates、GET /api/templates/{id}、GET /api/templates/{id}/cover        |
+| 素材 | POST /api/assets、GET /api/assets/{id}/content                                    |
+| 制作 | POST /api/tasks、GET /api/tasks、GET /api/tasks/{id}、GET /api/tasks/{id}/result  |
+| 连通 | GET /api/health                                                                   |
 
 所有 POST 带最新 `X-CSRF-TOKEN`；登录变更会话 ID/token，退出销毁会话。素材/任务/结果按 Java 会话用户查询，他人对象统一 404。Cookie 为 HttpOnly、SameSite=Lax，个人响应 no-store。上传恰好一个 multipart `file`，只收真实可解码 JPEG/PNG，声明类型须匹配，非空且 ≤5 MiB，宽高各 ≤8192、总像素 ≤2500 万；建任务再次校验数量、归属与文件可用性。
 
